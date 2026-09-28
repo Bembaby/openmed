@@ -174,7 +174,22 @@ def _select_split_source(path: Path | None, *, split: str) -> Path | None:
     if len(candidates) > 1:
         names = ", ".join(candidate.name for candidate in candidates)
         raise ValueError(f"multiple CMeEE {split!r} sources found: {names}")
-    return candidates[0] if candidates else path
+    if candidates:
+        return candidates[0]
+    # A named release layout must not fall through to the generic recursive
+    # loader, which would mix other splits and label them as the requested one.
+    known_splits = {"train", "dev", "val", "validation", "test"}
+    if any(
+        candidate.is_file()
+        and candidate.suffix.lower() in {".json", ".jsonl", ".ndjson"}
+        and "cmeee" in candidate.name.lower()
+        and known_splits.intersection(
+            candidate.stem.lower().replace("-", "_").split("_")
+        )
+        for candidate in path.rglob("*")
+    ):
+        raise ValueError("CMeEE named split directory has no requested split source")
+    return path
 
 
 __all__ = [
