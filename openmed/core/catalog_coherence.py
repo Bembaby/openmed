@@ -27,7 +27,12 @@ def _load_manifest_rows(path: Path) -> list[dict[str, Any]]:
             if not stripped:
                 continue
             try:
-                rows.append(json.loads(stripped))
+                row = json.loads(stripped)
+                if not isinstance(row, dict):
+                    raise ValueError(
+                        f"{path} line {line_number}: expected a JSON object"
+                    )
+                rows.append(row)
             except json.JSONDecodeError as exc:
                 raise ValueError(f"{path} line {line_number}: {exc}") from exc
     return rows
