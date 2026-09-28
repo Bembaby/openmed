@@ -9,6 +9,15 @@ from typing import Any, Optional
 
 from ..processing.outputs import EntityPrediction, PredictionResult
 
+_LEGACY_PAYLOAD_KEYS = (
+    "text",
+    "entities",
+    "model_name",
+    "timestamp",
+    "processing_time",
+    "metadata",
+)
+
 
 def _to_float(value: Any) -> Optional[float]:
     """Convert numeric-like values to built-in floats for JSON payloads."""
@@ -84,11 +93,11 @@ class AnalyzeResult(Mapping[str, Any]):
 
     def __iter__(self) -> Iterator[str]:
         """Iterate over legacy payload keys."""
-        return iter(self.to_dict())
+        return iter(_LEGACY_PAYLOAD_KEYS)
 
     def __len__(self) -> int:
         """Return the number of legacy payload keys."""
-        return len(self.to_dict())
+        return len(_LEGACY_PAYLOAD_KEYS)
 
     def _repr_html_(self) -> str:
         """Render a highlighted-span HTML view for Jupyter/IPython notebooks.
