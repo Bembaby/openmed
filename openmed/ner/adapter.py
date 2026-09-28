@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Protocol, Sequence, Tuple
 
@@ -130,7 +131,7 @@ def _tokenize(text: str, tokenizer: Any) -> List[Tuple[str, int, int]]:
         # Some tokenizers require positional arguments only.
         encoded = resolved(text)
 
-    offsets = encoded.get("offset_mapping") if isinstance(encoded, dict) else None
+    offsets = encoded.get("offset_mapping") if isinstance(encoded, Mapping) else None
     if not offsets:
         return _simple_tokenize(text)
 
