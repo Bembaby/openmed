@@ -60,7 +60,9 @@ def evaluate_medmentions_st21pv(
 
     Args:
         path: Local caller-created st21pv JSONL projection.
-        provider: Local callback returning ranked UMLS candidates.
+        provider: Local callback returning ranked UMLS candidates. A selected
+            GroundedSpan includes its alternatives for top-k scoring; unselected
+            or explicitly abstained spans remain abstentions.
         top_k: Candidate depth used for the secondary top-k metric.
 
     Returns:
@@ -81,7 +83,12 @@ def evaluate_medmentions_st21pv(
     abstentions = 0
     for case in cases:
         output = provider(case.mention, top_k)
-        candidates = output.candidates if isinstance(output, GroundedSpan) else output
+        if isinstance(output, GroundedSpan):
+            candidates = output.candidates + output.ranked_alternatives
+            if output.abstained or not output.candidates:
+                candidates = ()
+        else:
+            candidates = output
         codes = [
             candidate.code
             for candidate in candidates
